@@ -141,6 +141,10 @@ async fn bound_machine(app: &TestApp) -> (String, String, i64, String) {
     assert_eq!(reply.status, StatusCode::OK, "{}", reply.body);
     let secret = reply.body["agent_secret"].as_str().expect("secret de liaison").to_string();
     let target = reply.body["target_id"].as_i64().expect("cible");
+    // L'agent a rangé son secret et l'a présenté : la liaison est acquise, plus
+    // aucun secret ne sera remis sans fenêtre de reliaison.
+    let confirmed = push(app, &enrolment, "id-nas", "nas", Some(&secret), true).await;
+    assert_eq!(confirmed.status, StatusCode::OK, "{}", confirmed.body);
     (enrolment, secret, target, admin)
 }
 
